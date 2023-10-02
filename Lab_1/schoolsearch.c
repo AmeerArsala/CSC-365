@@ -1,6 +1,18 @@
-#include <stdio.h>
+/* 
+ * File:   schoolsearch.c
+ * Author: Ameer Arsala
+ *
+ * 
+ */
 
-int main() {
-    printf("Hello, world!");
-    return 0;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "schoolsearch.h"
+
+char* toString(Student* studentInfo) {
+    Student student = *studentInfo;
+    
+    char
 }
