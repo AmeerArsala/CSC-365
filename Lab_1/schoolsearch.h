@@ -25,10 +25,15 @@ typedef struct {
     struct Name studentName;
     int grade;
     int classroom;
-    int bus; /* you make me busss */
+    int bus; /* you make me busss, yugonmakmibussss */
     double gpa;
     struct Name teacherName;
 } Student;
+
+typedef struct {
+    Student* array;
+    size_t size;
+} StudentList;
 
 struct Name {
     char* lastName;
@@ -48,11 +53,26 @@ struct Name MakeName(struct Name name);
 char* toString(Student* studentInfo);
 
 Student fromLine(char* line);
-/* TODO: fromLines */
+StudentList fromString(char* lines);
 
-Student* findStudentsByInfo(Student* studentInfo);
+int namesEqual(Name n1, Name n2);
+int studentsEqual(Student s1, Student s2);
+int matchesStudent(Student incompleteInfo, Student potentialMatch);
 
+StudentList findStudentsByInfo(Student* studentInfoPtr, StudentList studentList);
 
+/* Commands */
+int isCommandArg(char* str, CommandArg cmdArg);
+void interpretCommand(char* cmd);
+void student_cmd(char* lastName, int* bus);
+void teacher_cmd(char* lastName);
+void bus_cmd(int bus);
+void grade_cmd(int grade);
+void grade_high_cmd(int grade);
+void grade_low_cmd(int grade);
+void average_cmd(int grade);
+void info_cmd();
+void quit_cmd();
 
 #endif /* SCHOOLSEARCH_H */
 
