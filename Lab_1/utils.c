@@ -65,7 +65,7 @@ StringArray splitString(const char* input, const char delimiter) {
     return strList;
 }
 
-char* substring(const char* str, int start, int length) {
+char* substringFrom(const char* str, int start, int length) {
     /* Check for invalid inputs */
     if (start < 0 || length < 0 || start + length > strlen(str)) {
         return NULL;

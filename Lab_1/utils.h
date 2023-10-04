@@ -23,7 +23,7 @@ void freeStringArray(StringArray *arr);
 
 StringArray splitString(const char* input, const char delimiter);
 
-char* substring(const char* str, int start, int length);
+char* substringFrom(const char* str, int start, int length);
 char* substring(const char* str, int start, int end, int length);
 
 #endif /* UTILS_H */
