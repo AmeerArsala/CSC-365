@@ -12,7 +12,7 @@
 #include "schoolsearch.h"
 #include "utils.h"
 
-const struct Name NO_NAME = {NULL, NULL};
+const struct Name NO_NAME = {.firstName = NULL, .lastName = NULL};
 const Student NULL_STUDENT = {.studentName = NO_NAME, 
                               .grade = -1,
                               .classroom = -1,
@@ -29,20 +29,6 @@ const CommandArg ARG_LOW = {'L', "Low"};
 const CommandArg CMD_AVERAGE = {'A', "Average"};
 const CommandArg CMD_INFO = {'I', "Info"};
 const CommandArg CMD_QUIT = {'Q', "Quit"};
-
-StudentList* studentList;
-int finished = 0;
-
-/* Initialize the list of students from the file */
-void initsearch(char* file) {
-    studentList = malloc(sizeof(StudentList));
-    *studentList = fromString(file);
-    finished = 0;
-}
-
-void cleanup() {
-    free(studentList);
-}
 
 /*
  * Queries are just incomplete students
@@ -85,6 +71,10 @@ Student MakeQuery(Student studentInfo) {
 
 struct Name MakeName(struct Name name) {
     struct Name nameFinal;
+
+    if (&name == NULL) {
+        return NO_NAME;    
+    }
     
     nameFinal.firstName = name.firstName ? name.firstName : NO_NAME.firstName;
     nameFinal.lastName = name.lastName ? name.lastName : NO_NAME.lastName;
@@ -106,40 +96,40 @@ char* toString(Student* studentInfoPtr) {
 }
 
 Student fromLine(char* line) {
-    StringArray* row = malloc(sizeof(StringArray));
-    
-    *row = splitString(line, ',');
+    StringArray row = splitString(line, ',');
+
+    //printf(line);
+    //Student* student = malloc(sizeof(Student));
     
     Student student = {
-        .studentName = {.firstName = row->array[0], .lastName = row->array[1]},
-        .grade = atoi(row->array[2]),
-        .classroom = atoi(row->array[3]),
-        .bus = atoi(row->array[4]),
-        .gpa = atof(row->array[5]),
-        .teacherName = {.firstName = row->array[6], .lastName = row->array[7]}
+        .studentName = {.lastName = row.array[0], .firstName = row.array[1]},
+        .grade = atoi(row.array[2]),
+        .classroom = atoi(row.array[3]),
+        .bus = atoi(row.array[4]),
+        .gpa = atof(row.array[5]),
+        .teacherName = {.lastName = row.array[6], .firstName = row.array[7]}
     };
     
-    free(row);
+    //freeStringArray(&row);
+    //free(row);
     
     return student;
 }
 
-StudentList fromString(char* str) {
-    StringArray* lines = malloc(sizeof(StringArray));
+StudentList* fromString(char* str) {
+    StringArray lines = splitString(str, '\n');
     
-    *lines = splitString(str, '\n');
+    size_t sz = lines.size;
     
-    /* num students = *lines.size */
-    Student students[lines->size];
-    for (size_t i = 0; i < lines->size; ++i) {
-        students[i] = fromLine(lines->array[i]);
+    StudentList* studentsList = malloc(sizeof(StudentList));
+    studentsList->size = sz;
+    for (size_t i = 0; i < sz; ++i) {
+        studentsList->array[i] = fromLine(lines.array[i]);
     }
     
-    free(lines);
+    //freeStringArray(&lines);
     
-    StudentList studentList = {students, lines->size};
-    
-    return studentList;
+    return studentsList;
 }
 
 int namesEqual(struct Name n1, struct Name n2) {
@@ -156,37 +146,36 @@ int studentsEqual(Student s1, Student s2) {
 }
 
 /* Incomplete Info = standardized partial info */
-int matchesStudent(Student incompleteInfo, Student potentialMatch) {
-    
-    if (incompleteInfo.studentName.firstName != NO_NAME.firstName && strcmp(incompleteInfo.studentName.firstName, potentialMatch.studentName.firstName) != 0) {
+int matchesStudent(Student* incompleteInfo, Student* potentialMatch) {
+    if (incompleteInfo->studentName.firstName != NO_NAME.firstName && strcmp(incompleteInfo->studentName.firstName, potentialMatch->studentName.firstName) != 0) {
         return 0;
     }
     
-    if (incompleteInfo.studentName.lastName != NO_NAME.lastName && strcmp(incompleteInfo.studentName.lastName, potentialMatch.studentName.lastName) != 0) {
+    if (incompleteInfo->studentName.lastName != NO_NAME.lastName && strcmp(incompleteInfo->studentName.lastName, potentialMatch->studentName.lastName) != 0) {
         return 0;
     }
     
-    if (incompleteInfo.grade != NULL_STUDENT.grade && incompleteInfo.grade != potentialMatch.grade) {
+    if (incompleteInfo->grade != NULL_STUDENT.grade && incompleteInfo->grade != potentialMatch->grade) {
         return 0;
     }
     
-    if (incompleteInfo.classroom != NULL_STUDENT.classroom && incompleteInfo.classroom != potentialMatch.classroom) {
+    if (incompleteInfo->classroom != NULL_STUDENT.classroom && incompleteInfo->classroom != potentialMatch->classroom) {
         return 0;
     }
     
-    if (incompleteInfo.bus != NULL_STUDENT.bus && incompleteInfo.bus != potentialMatch.bus) {
+    if (incompleteInfo->bus != NULL_STUDENT.bus && incompleteInfo->bus != potentialMatch->bus) {
         return 0;
     }
     
-    if (incompleteInfo.gpa != NULL_STUDENT.gpa && incompleteInfo.gpa != potentialMatch.gpa) {
+    if (incompleteInfo->gpa != NULL_STUDENT.gpa && incompleteInfo->gpa != potentialMatch->gpa) {
         return 0;
     }
     
-    if (incompleteInfo.teacherName.firstName != NO_NAME.firstName && strcmp(incompleteInfo.teacherName.firstName, potentialMatch.teacherName.firstName) != 0) {
+    if (incompleteInfo->teacherName.firstName != NO_NAME.firstName && strcmp(incompleteInfo->teacherName.firstName, potentialMatch->teacherName.firstName) != 0) {
         return 0;
     }
     
-    if (incompleteInfo.teacherName.lastName != NO_NAME.lastName && strcmp(incompleteInfo.teacherName.lastName, potentialMatch.teacherName.lastName) != 0) {
+    if (incompleteInfo->teacherName.lastName != NO_NAME.lastName && strcmp(incompleteInfo->teacherName.lastName, potentialMatch->teacherName.lastName) != 0) {
         return 0;
     }
     
@@ -194,32 +183,42 @@ int matchesStudent(Student incompleteInfo, Student potentialMatch) {
 }
 
 /* Info can be incomplete */
-StudentList findStudentsByInfo(Student partialInfo) {
-    Student students[studentList->size];
+StudentList findStudentsByInfo(Student partialInfo, StudentList* studentList) {
+    size_t sizeStudents = studentList->size;
+
+    StudentList students;
     Student studentInfo = MakeQuery(partialInfo);
-    
+
     size_t s = 0;
-    for(size_t i = 0; i < studentList->size; ++i) {
-        if (matchesStudent(studentInfo, studentList->array[i])) {
-            students[s++] = studentList->array[i];
+    for(size_t i = 0; i < sizeStudents; ++i) {
+        Student* student = &(studentList->array[i]);
+        if (matchesStudent(&studentInfo, student)) {
+            students.array[s++] = *student;
         }
     }
     
-    StudentList studentList = {students, s};
-    return studentList;
+    students.size = s;
+    return students;
 }
 
 /* Commands */
 int isCommandArg(char* str, CommandArg cmdArg) {
-    return (str[0] == cmdArg.shorthand && str[1] == ':') || strcmp(substring(str, 0, strlen(str) - 1, 1), cmdArg.full) == 0;
+    int str_len = strlen(str);
+    if (str_len == 1) {
+        return str[0] == cmdArg.shorthand;
+    } else if (str_len == 2) {
+        return str[0] == cmdArg.shorthand && str[1] == ':';
+    } else {
+        return strcmp(substring(str, 0, strlen(str) - 1, 1), cmdArg.full) == 0 || strcmp(substring(str, 0, strlen(str) - 2, 1), cmdArg.full) == 0;
+    }
 }
 
-static void student_cmd(char* lastName) {
+static void student_cmd(char* lastName, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.studentName = {.lastName = lastName}};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList);
     
     /* For each student/entry found, print:
      * last name, first name
@@ -228,26 +227,27 @@ static void student_cmd(char* lastName) {
      */
     for (size_t i = 0; i < results->size; ++i) {
         Student result = results->array[i];
-        printf("%s,%s; Grade: %d; Classroom: %d; Teacher: %s,%s", 
+        printf("%s,%s; Grade: %d; Classroom: %d; Teacher: %s,%s\n", 
                 result.studentName.lastName, result.studentName.firstName,
                 result.grade, result.classroom,
                 result.teacherName.lastName, result.teacherName.firstName);
     }
     
+    //free(results->array);
     free(results);
 }
 
-static void student_bus_cmd(char* lastName) {
+static void student_bus_cmd(char* lastName, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.studentName = {.lastName = lastName}};
-    *results = findStudentsByInfo(searchQuery);
+    *results = findStudentsByInfo(searchQuery, studentList);
     
     /* For each entry found, print the last name, first name and the bus route the student takes. */
     for (size_t i = 0; i < results->size; ++i) {
         Student result = results->array[i];
-        printf("%s,%s; Bus Route: %d", 
+        printf("%s,%s; Bus Route: %d\n", 
                 result.studentName.lastName, result.studentName.firstName,
                 result.bus);
     }
@@ -255,33 +255,33 @@ static void student_bus_cmd(char* lastName) {
     free(results);
 }
 
-static void teacher_cmd(char* lastName) {
+static void teacher_cmd(char* lastName, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.teacherName = {.lastName = lastName}};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList); 
     
     /* For each entry found, print the last and the first name of the student. */
     for (size_t i = 0; i < results->size; ++i) {
         Student result = results->array[i];
-        printf("%s,%s", result.studentName.lastName, result.studentName.firstName);
+        printf("%s,%s\n", result.studentName.lastName, result.studentName.firstName);
     }
     
     free(results);
 }
 
-static void bus_cmd(int bus) {
+static void bus_cmd(int bus, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.bus = bus};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList); 
     
     /* For each such entry, output the name of the student (last and first) and their grade and classroom. */
     for (size_t i = 0; i < results->size; ++i) {
         Student result = results->array[i];
-        printf("%s,%s; Grade: %d; Classroom: %d", 
+        printf("%s,%s; Grade: %d; Classroom: %d\n", 
                 result.studentName.lastName, result.studentName.firstName,
                 result.grade, result.classroom);
     }
@@ -289,28 +289,28 @@ static void bus_cmd(int bus) {
     free(results);
 }
 
-static void grade_cmd(int grade) {
+static void grade_cmd(int grade, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.grade = grade};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList); 
     
     /* For each entry, output the name (last and first) of the student. */
     for (size_t i = 0; i < results->size; ++i) {
         Student result = results->array[i];
-        printf("%s,%s", result.studentName.lastName, result.studentName.firstName);
+        printf("%s,%s\n", result.studentName.lastName, result.studentName.firstName);
     }
     
     free(results);
 }
 
-static void grade_high_cmd(int grade) {
+static void grade_high_cmd(int grade, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.grade = grade};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList); 
     
     Student entry = results->array[0];
     for (size_t i = 1; i < results->size; ++i) {
@@ -321,7 +321,7 @@ static void grade_high_cmd(int grade) {
     }
     
     /* Report the contents of the highest GPA entry (name of the student, GPA, teacher, bus route). */
-    printf("%s,%s; GPA: %f; Teacher: %s,%s; Bus Route: %d", 
+    printf("%s,%s; GPA: %f; Teacher: %s,%s; Bus Route: %d\n", 
             entry.studentName.lastName, entry.studentName.firstName,
             entry.gpa,
             entry.teacherName.lastName, entry.teacherName.firstName,
@@ -330,12 +330,12 @@ static void grade_high_cmd(int grade) {
     free(results);
 }
 
-static void grade_low_cmd(int grade) {
+static void grade_low_cmd(int grade, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.grade = grade};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList); 
     
     Student entry = results->array[0];
     for (size_t i = 1; i < results->size; ++i) {
@@ -346,7 +346,7 @@ static void grade_low_cmd(int grade) {
     }
     
     /* Report the contents of the lowest GPA entry (name of the student, GPA, teacher, bus route). */
-    printf("%s,%s; GPA: %f; Teacher: %s,%s; Bus Route: %d", 
+    printf("%s,%s; GPA: %f; Teacher: %s,%s; Bus Route: %d\n", 
             entry.studentName.lastName, entry.studentName.firstName,
             entry.gpa,
             entry.teacherName.lastName, entry.teacherName.firstName,
@@ -355,12 +355,12 @@ static void grade_low_cmd(int grade) {
     free(results);
 }
 
-static void average_cmd(int grade) {
+static void average_cmd(int grade, StudentList* studentList) {
     StudentList* results = malloc(sizeof(StudentList));
     
     /* Search for students */
     Student searchQuery = {.grade = grade};
-    *results = findStudentsByInfo(searchQuery); 
+    *results = findStudentsByInfo(searchQuery, studentList); 
     
     double average = 0;
     for (size_t i = 0; i < results->size; ++i) {
@@ -371,87 +371,85 @@ static void average_cmd(int grade) {
     average /= results->size;
     
     /* Compute the average GPA score for the entries found. Output the grade level (the number provided in command) and the average GPA score computed. */
-    printf("Grade Level: %d => Average: %f", grade, average);
+    printf("Grade Level: %d => Average: %f\n", grade, average);
     
     free(results);
 }
 
-static void info_cmd() {
+static void info_cmd(StudentList* studentList) {
     for (size_t i = 0; i <= 6; ++i) {
         StudentList* results = malloc(sizeof(StudentList));
         
         /* Search for students */
         Student searchQuery = {.grade = i};
-        *results = findStudentsByInfo(searchQuery);
+        *results = findStudentsByInfo(searchQuery, studentList);
         
         /* Report number of students per grade */
-        printf("%d: %d", i, (int)results->size);
+        printf("%d: %d\n", (int)i, (int)results->size);
         
         free(results);
     }
 }
 
-static void quit_cmd() {
-    finished = 1;
-    cleanup();
+static void quit_cmd(int* finished) {
+    *finished = 1;
 }
 
-void interpretCommand(char* cmd) {
-    StringArray* line = malloc(sizeof(StringArray));
-    
-    *line = splitString(cmd, ' '); /* split by space */
+void interpretCommand(char* cmd, StudentList* studentList, int* finishedPtr) {
+    StringArray line = splitString(cmd, ' '); /* split by space */
     
     /* Student */
-    if (isCommandArg(line->array[0], CMD_STUDENT)) {
-        char* lastName = line->array[1];
-        if (line->size == 2) {
-            student_cmd(lastName);
-        } else { /* line->size == 3 */
-            if (isCommandArg(line->array[2], CMD_BUS)) {
-                student_bus_cmd(lastName);
+    if (isCommandArg(line.array[0], CMD_STUDENT)) {
+        char* lastName = line.array[1];
+        if (line.size == 2) {
+            student_cmd(lastName, studentList);
+        } else { /* line.size == 3 */
+            if (isCommandArg(line.array[2], CMD_BUS)) {
+                student_bus_cmd(lastName, studentList);
             }
         }
     }
     
     /* Teacher */
-    if (isCommandArg(line->array[0], CMD_TEACHER)) {
-        teacher_cmd(line->array[1]);
+    if (isCommandArg(line.array[0], CMD_TEACHER)) {
+        teacher_cmd(line.array[1], studentList);
     }
     
     /* Bus */
-    if (isCommandArg(line->array[0], CMD_BUS)) {
-        bus_cmd(atoi(line->array[1]));
+    if (isCommandArg(line.array[0], CMD_BUS)) {
+        bus_cmd(atoi(line.array[1]), studentList);
     }
     
     /* Grade */
-    if (isCommandArg(line->array[0], CMD_GRADE)) {
-        int grade = atoi(line->array[1]);
-        if (line->size == 3) {
-            if (isCommandArg(line->array[2], ARG_HIGH)) {
-                grade_high_cmd(grade);
-            } else if (isCommandArg(line->array[2], ARG_LOW)) {
-                grade_low_cmd(grade);
+    if (isCommandArg(line.array[0], CMD_GRADE)) {
+        int grade = atoi(line.array[1]);
+        if (line.size == 3) {
+            if (isCommandArg(line.array[2], ARG_HIGH)) {
+                grade_high_cmd(grade, studentList);
+            } else if (isCommandArg(line.array[2], ARG_LOW)) {
+                grade_low_cmd(grade, studentList);
             }
         } else { /* line->size == 2 */
-            grade_cmd(grade);
+            grade_cmd(grade, studentList);
         }
     }
     
     /* Average */
-    if (isCommandArg(line->array[0], CMD_AVERAGE)) {
-        bus_cmd(atoi(line->array[1]));
+    if (isCommandArg(line.array[0], CMD_AVERAGE)) {
+        bus_cmd(atoi(line.array[1]), studentList);
     }
     
     /* Info */
-    if (isCommandArg(line->array[0], CMD_INFO)) {
-        info_cmd();
+    if (isCommandArg(line.array[0], CMD_INFO)) {
+        info_cmd(studentList);
     }
     
     /* Quit */
-    if (isCommandArg(line->array[0], CMD_QUIT)) {
-        quit_cmd();
+    if (isCommandArg(line.array[0], CMD_QUIT)) {
+        quit_cmd(finishedPtr);
     }
     
-    free(line);
+    printf("\n"); // new line at the end
+    freeStringArray(&line);
 }
 

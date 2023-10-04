@@ -8,7 +8,7 @@
 #ifndef SCHOOLSEARCH_H
 #define SCHOOLSEARCH_H
 
-extern int finished;
+#define MAX_STUDENTS 60
 
 struct Name {
     char* lastName;
@@ -25,7 +25,7 @@ typedef struct {
 } Student;
 
 typedef struct {
-    Student* array;
+    Student array[MAX_STUDENTS];
     size_t size;
 } StudentList;
 
@@ -48,12 +48,6 @@ extern const CommandArg CMD_AVERAGE;
 extern const CommandArg CMD_INFO;
 extern const CommandArg CMD_QUIT;
 
-extern StudentList* studentList;
-
-/* Program Initialization */
-void initsearch(char* file);
-void cleanup();
-
 /* Struct Initialization */
 Student MakeQuery(Student studentInfo);
 struct Name MakeName(struct Name name);
@@ -63,17 +57,17 @@ struct Name MakeName(struct Name name);
 char* toString(Student* studentInfo);
 
 Student fromLine(char* line);
-StudentList fromString(char* lines);
+StudentList* fromString(char* lines);
 
 int namesEqual(struct Name n1, struct Name n2);
 int studentsEqual(Student s1, Student s2);
-int matchesStudent(Student incompleteInfo, Student potentialMatch);
+int matchesStudent(Student* incompleteInfo, Student* potentialMatch);
 
-StudentList findStudentsByInfo(Student partialInfo);
+StudentList findStudentsByInfo(Student partialInfo, StudentList* studentList);
 
 /* Commands */
 int isCommandArg(char* str, CommandArg cmdArg);
-void interpretCommand(char* cmd);
+void interpretCommand(char* cmd, StudentList* studentList, int* finishedPtr);
 
 #endif /* SCHOOLSEARCH_H */
 

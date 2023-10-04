@@ -89,15 +89,17 @@ int readall(FILE *in, char **dataptr, size_t *sizeptr)
 }
 
 void searchschool(char* datafile) {
-    initsearch(datafile);
-    
+    //initsearch(datafile);
+    StudentList* studentList = fromString(datafile);
+    int finished = 0;
+
     while (!finished) {
         char userInput[MAX_INPUT_LENGTH];
 
         /* Prompt User */
         printf("Query> ");
 
-        /* Read the string using fgets */
+        /* Read the string using fgets and print a new line */
         fgets(userInput, sizeof(userInput), stdin);
 
         /* Remove the newline character at the end (if present) */
@@ -106,16 +108,16 @@ void searchschool(char* datafile) {
         }
 
         /* Process the entered string */
-        interpretCommand(userInput);
+        interpretCommand(userInput, studentList, &finished);
     }
+
+    free(studentList);
 }
 
 /*
  * 
  */
 int main(int argc, char** argv) {
-    printf("hello world");
-    
     const char* file_path = "students.txt";
     
     /* Open file */

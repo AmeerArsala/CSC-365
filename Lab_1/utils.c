@@ -49,14 +49,14 @@ StringArray splitString(const char* input, const char delimiter) {
     char *str = strdup(input); /* Duplicate the input string since strtok_r modifies the original */
     char *saveptr;
     
-    token = strtok_r(str, delimiter, &saveptr);
+    token = strtok_r(str, &delimiter, &saveptr);
     
     /* Keep getting tokens while one is found */
     while (token != NULL) {
         addString(&strList, token);
         
         /* next token */
-        token = strtok_r(NULL, delimiter, &saveptr);
+        token = strtok_r(NULL, &delimiter, &saveptr);
     }
     
     /* Free duplicated string */
