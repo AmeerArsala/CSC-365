@@ -436,7 +436,7 @@ void interpretCommand(char* cmd, StudentList* studentList, int* finishedPtr) {
     
     /* Average */
     if (isCommandArg(line.array[0], CMD_AVERAGE)) {
-        bus_cmd(atoi(line.array[1]), studentList);
+        average_cmd(atoi(line.array[1]), studentList);
     }
     
     /* Info */
