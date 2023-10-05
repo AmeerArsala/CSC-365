@@ -1,3 +1,165 @@
 # CSC 365
+# Lab 1 - a test suite
 # Name: Ameer Arsala
 
+# TC-1
+# Test Requirements R3, R4
+# short form command name (student), existing student
+# expected output: KOZOLA,BUSTER; Grade: 2; Classroom: 108; Teacher: HAMER,GAVIN
+Query> S: KOZOLA
+KOZOLA,BUSTER; Grade: 2; Classroom: 108; Teacher: HAMER,GAVIN
+
+# TC-2
+# Test Requirements R3, R5
+# full form command name (student bus), existing student
+# expected output: COOKUS,XUAN; Bus Route: 52
+Query> Student: COOKUS Bus
+COOKUS,XUAN; Bus Route: 52
+
+# TC-3
+# Test Requirements R3, R13
+# short form command name, non-existing student
+# expected output: <empty line>
+Query> S: QUANTAVIOUS
+
+# TC-4
+# Test Requirements R3, R6
+# short form command name, existing teacher
+/*expected output: 
+    LIBRANDI,TODD
+    HAVIR,BOBBIE
+    SARAO,DIEDRA
+    VANCOTT,MIKE
+    WICINSKY,TERESE
+    KOZOLA,BUSTER
+    MULLINGS,LEIGHANN
+    BUSSMANN,BILLY
+    BERBES,DICK
+    MULGREW,RANDELL
+    TOWLEY,LANE
+*/
+Query> T: HAMER
+LIBRANDI,TODD
+HAVIR,BOBBIE
+SARAO,DIEDRA
+VANCOTT,MIKE
+WICINSKY,TERESE
+KOZOLA,BUSTER
+MULLINGS,LEIGHANN
+BUSSMANN,BILLY
+BERBES,DICK
+MULGREW,RANDELL
+TOWLEY,LANE
+
+# TC-4
+# Test Requirements R3, R7
+# short form command name, grade 3
+/* expected output: 
+    COOKUS,XUAN
+    ELHADDAD,SHANTE
+    BRODERSEN,HYE
+    SWEDLUND,SHARRI
+    CIGANEK,MANIE
+    COVINGTON,TOMAS
+    EARLY,TORY
+    LINHART,LELA
+    THEUNISSEN,GRACE
+*/
+Query> G: 3
+COOKUS,XUAN
+ELHADDAD,SHANTE
+BRODERSEN,HYE
+SWEDLUND,SHARRI
+CIGANEK,MANIE
+COVINGTON,TOMAS
+EARLY,TORY
+LINHART,LELA
+THEUNISSEN,GRACE
+
+# TC-5
+# Test Requirements R3, R7
+# full form command name, grade 2
+/* expected output: 
+    WOOLERY,NOLAN
+    VILARDO,EMMANUEL
+    LIBRANDI,TODD
+    HAVIR,BOBBIE
+    SARAO,DIEDRA
+    VANCOTT,MIKE
+    WICINSKY,TERESE
+    KOZOLA,BUSTER
+    MULLINGS,LEIGHANN
+    BUSSMANN,BILLY
+    BERBES,DICK
+    MULGREW,RANDELL
+    TOWLEY,LANE
+*/
+Query> Grade: 2
+WOOLERY,NOLAN
+VILARDO,EMMANUEL
+LIBRANDI,TODD
+HAVIR,BOBBIE
+SARAO,DIEDRA
+VANCOTT,MIKE
+WICINSKY,TERESE
+KOZOLA,BUSTER
+MULLINGS,LEIGHANN
+BUSSMANN,BILLY
+BERBES,DICK
+MULGREW,RANDELL
+TOWLEY,LANE
+
+# TC-6
+# Test Requirements R3, R9
+# short form command name, grade 3 highest GPA
+# expected output: SWEDLUND,SHARRI; GPA: 3.240000; Teacher: FAFARD,ROCIO; Bus Route: 55
+Query> G: 3 High
+SWEDLUND,SHARRI; GPA: 3.240000; Teacher: FAFARD,ROCIO; Bus Route: 55
+
+# TC-7
+# Test Requirements R3, R9
+# short form command name, grade 2 lowest GPA
+# expected output: KOZOLA,BUSTER; GPA: 2.760000; Teacher: HAMER,GAVIN; Bus Route: 55
+Query> G: 2 L
+KOZOLA,BUSTER; GPA: 2.760000; Teacher: HAMER,GAVIN; Bus Route: 55
+
+# TC-8
+# Test Requirements R3, R10
+# short form command name, average 4th grade GPA
+# expected output: Grade Level: 4 => Average: 2.951333
+Query> A: 4
+Grade Level: 4 => Average: 2.951333
+
+# TC-9
+# Test Requirements R3, R4
+# full form command name, average 2nd grade GPA
+# expected output: Grade Level: 2 => Average: 2.946154
+Query> Average: 2
+Grade Level: 2 => Average: 2.946154
+
+# TC-10
+# Test Requirements R3, R11
+# short form command name, info
+/* expected output: 
+    0: 60
+    1: 2
+    2: 13
+    3: 9
+    4: 15
+    5: 0
+    6: 21
+*/
+Query> I
+0: 60
+1: 2
+2: 13
+3: 9
+4: 15
+5: 0
+6: 21
+
+# TC-11
+# Test Requirements R3, R12
+# quit command
+# expected output: program terminates
+Query> Q
